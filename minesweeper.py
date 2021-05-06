@@ -109,7 +109,7 @@ class Cell:
             self.canvas.config(bg="gray4")
 
 
-class Grid:
+class Minesweeper:
     def __init__(self) -> None:
         self.main: tk.Tk = None
         self.grid: t.List[t.List[Cell]] = []
@@ -214,7 +214,7 @@ class Grid:
             final.append(self.grid[i][j - 1])
         if j != self.columns - 1:
             final.append(self.grid[i][j + 1])
-        if i != 0 and j != 0:
+        if 0 not in {i, j}:
             final.append(self.grid[i - 1][j - 1])
         if i != self.rows - 1 and j != self.columns - 1:
             final.append(self.grid[i + 1][j + 1])
@@ -319,7 +319,7 @@ class Grid:
 
 def main():
     """Start the game."""
-    Grid().start()
+    Minesweeper().start()
 
 
 if __name__ == "__main__":

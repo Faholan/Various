@@ -6,6 +6,7 @@ from random import choice
 
 
 class Cell:
+    """Implement one cell."""
 
     colours = (
         "gray4",
@@ -20,6 +21,7 @@ class Cell:
     )
 
     def __init__(self, master, i, j):
+        """Initialize the cell."""
         self.master = master
         self.size = self.master.size
         self.canvas = tk.Canvas(
@@ -39,6 +41,7 @@ class Cell:
         self.canvas.grid(row=i, column=j)
 
     def left(self, _=None) -> None:
+        """Implement left clicking."""
         if self.flagged or not self.master.enabled:
             return
         if self.master.blank:
@@ -92,7 +95,7 @@ class Cell:
         return self.colours[self.value]
 
     def click(self) -> None:
-        """Fill with color."""
+        """Fill the cell with color."""
         if self.flagged:
             self.flag()
         self.clicked = True
@@ -110,7 +113,10 @@ class Cell:
 
 
 class Minesweeper:
+    """Main class, actually implement the game."""
+
     def __init__(self) -> None:
+        """Initialize the minesweeper."""
         self.main: tk.Tk = None
         self.grid: t.List[t.List[Cell]] = []
         self.size = 0
@@ -139,7 +145,7 @@ class Minesweeper:
     def gen_game(self, size, mines, rows, columns) -> t.Callable:
         """Generate callables for the different difficulties."""
 
-        def wrapper() -> None:
+        def predictate() -> None:
             self.size = size
             self.mines = mines
             self.cur_mines = mines
@@ -150,7 +156,7 @@ class Minesweeper:
             self.main.destroy()
             self.game()
 
-        return wrapper
+        return predictate
 
     def start(self) -> None:
         """First screen."""

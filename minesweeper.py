@@ -37,7 +37,7 @@ class Cell:
         "value",
         "ismine",
         "flagged",
-        "clicked"
+        "clicked",
     )
 
     colours = (
@@ -183,8 +183,7 @@ class Minesweeper:
                 "bg": "midnight blue",
                 "command": self.gen_game(35, 40, 16, 16),
             },
-            {"text": "Hard", "bg": "red3",
-                "command": self.gen_game(30, 99, 16, 32)},
+            {"text": "Hard", "bg": "red3", "command": self.gen_game(30, 99, 16, 32)},
         )
         self.remaining: tk.Label = None
         self.blank = True  # Not clicked yet

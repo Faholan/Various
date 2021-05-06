@@ -29,6 +29,17 @@ from random import choice
 class Cell:
     """Implement one cell."""
 
+    __slots__ = (
+        "master",
+        "size",
+        "canvas",
+        "coords",
+        "value",
+        "ismine",
+        "flagged",
+        "clicked"
+    )
+
     colours = (
         "gray4",
         "blue",
@@ -68,11 +79,13 @@ class Cell:
         if self.master.blank:
             self.master.first_click(*self.coords)
         if self.clicked:
-            return self.master.second_click(*self.coords)
+            self.master.second_click(*self.coords)
+            return
         if self.ismine:
             self.canvas.config(bg="red3")
             self.master.enabled = False
-            return self.master.lose(*self.coords)
+            self.master.lose(*self.coords)
+            return
         self.click()
         if not self.value:
             self.master.zero(*self.coords)
@@ -135,6 +148,20 @@ class Cell:
 
 class Minesweeper:
     """Main class, actually implement the game."""
+
+    __slots__ = (
+        "main",
+        "grid",
+        "size",
+        "mines",
+        "cur_mines",
+        "rows",
+        "columns",
+        "difficulties",
+        "remaining",
+        "blank",
+        "enabled",
+    )
 
     def __init__(self) -> None:
         """Initialize the minesweeper."""

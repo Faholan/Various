@@ -1,9 +1,8 @@
 """Minesweeper."""
 
+import tkinter as tk
 import typing as t
 from random import choice
-
-import tkinter as tk
 
 
 class Cell:
@@ -28,7 +27,7 @@ class Cell:
             width=master.size,
             height=master.size,
             bg="gray80",
-            highlightbackground="gray4"
+            highlightbackground="gray4",
         )
         self.coords = (i, j)
         self.value = 0
@@ -66,20 +65,20 @@ class Cell:
             self.master.cur_mines += 1
         else:
             self.canvas.create_line(
-                17*self.size/48,
-                3*self.size/16,
-                17*self.size/48,
-                71*self.size/80,
+                17 * self.size / 48,
+                3 * self.size / 16,
+                17 * self.size / 48,
+                71 * self.size / 80,
                 fill="red",
                 width=2,
             )
             self.canvas.create_polygon(
-                17*self.size/48,
-                3*self.size/16,
-                19*self.size/24,
-                63*self.size/160,
-                17*self.size/48,
-                3*self.size/5,
+                17 * self.size / 48,
+                3 * self.size / 16,
+                19 * self.size / 24,
+                63 * self.size / 160,
+                17 * self.size / 48,
+                3 * self.size / 5,
                 outline="",
                 fill="red",
             )
@@ -100,11 +99,11 @@ class Cell:
         if self.value:
             self.canvas.config(bg="gray30")
             self.canvas.create_text(
-                self.size/2,
-                self.size/2,
+                self.size / 2,
+                self.size / 2,
                 text=str(self.value),
                 fill=self.colour,
-                font="arial 20"
+                font="arial 20",
             )
         else:
             self.canvas.config(bg="gray4")
@@ -130,11 +129,8 @@ class Grid:
                 "bg": "midnight blue",
                 "command": self.gen_game(35, 40, 16, 16),
             },
-            {
-                "text": "Hard",
-                "bg": "red3",
-                "command": self.gen_game(30, 99, 16, 32)
-            }
+            {"text": "Hard", "bg": "red3",
+                "command": self.gen_game(30, 99, 16, 32)},
         )
         self.remaining: tk.Label = None
         self.blank = True  # Not clicked yet
@@ -142,6 +138,7 @@ class Grid:
 
     def gen_game(self, size, mines, rows, columns) -> t.Callable:
         """Generate callables for the different difficulties."""
+
         def wrapper() -> None:
             self.size = size
             self.mines = mines
@@ -152,6 +149,7 @@ class Grid:
             self.enabled = True
             self.main.destroy()
             self.game()
+
         return wrapper
 
     def start(self) -> None:
@@ -169,13 +167,8 @@ class Grid:
         text.grid(column=0, row=0)
 
         for i, args in enumerate(self.difficulties):
-            button = tk.Button(
-                self.main,
-                fg="white",
-                font="arial 20",
-                **args
-            )
-            button.grid(column=0, row=i+1, sticky=tk.NSEW)
+            button = tk.Button(self.main, fg="white", font="arial 20", **args)
+            button.grid(column=0, row=i + 1, sticky=tk.NSEW)
         self.main.resizable(False, False)
         self.main.mainloop()
 
@@ -199,19 +192,14 @@ class Grid:
             font="arial 20",
             relief="flat",
             text=f"Mines: {self.cur_mines}",
-            justify=tk.CENTER
+            justify=tk.CENTER,
         )
         self.remaining.grid(
-            row=self.rows,
-            column=0,
-            columnspan=self.columns,
-            sticky=tk.EW
+            row=self.rows, column=0, columnspan=self.columns, sticky=tk.EW
         )
 
         self.grid = [
-            [
-                Cell(self, i, j) for j in range(self.columns)
-            ] for i in range(self.rows)
+            [Cell(self, i, j) for j in range(self.columns)] for i in range(self.rows)
         ]
         self.main.resizable(False, False)
 
@@ -219,21 +207,21 @@ class Grid:
         """Get the neighbours."""
         final = []
         if i != 0:
-            final.append(self.grid[i-1][j])
+            final.append(self.grid[i - 1][j])
         if i != self.rows - 1:
-            final.append(self.grid[i+1][j])
+            final.append(self.grid[i + 1][j])
         if j != 0:
-            final.append(self.grid[i][j-1])
+            final.append(self.grid[i][j - 1])
         if j != self.columns - 1:
-            final.append(self.grid[i][j+1])
+            final.append(self.grid[i][j + 1])
         if i != 0 and j != 0:
-            final.append(self.grid[i-1][j-1])
+            final.append(self.grid[i - 1][j - 1])
         if i != self.rows - 1 and j != self.columns - 1:
-            final.append(self.grid[i+1][j+1])
+            final.append(self.grid[i + 1][j + 1])
         if i != 0 and j != self.columns - 1:
-            final.append(self.grid[i-1][j+1])
+            final.append(self.grid[i - 1][j + 1])
         if i != self.rows - 1 and j != 0:
-            final.append(self.grid[i+1][j-1])
+            final.append(self.grid[i + 1][j - 1])
         return final
 
     def first_click(self, i: int, j: int) -> None:
@@ -263,9 +251,7 @@ class Grid:
     def second_click(self, i: int, j: int) -> None:
         """When you click for the second time."""
         neighb = self.neighbours(i, j)
-        if sum(
-            1 if cell.flagged else 0 for cell in neighb
-        ) == self.grid[i][j].value:
+        if sum(1 if cell.flagged else 0 for cell in neighb) == self.grid[i][j].value:
             for cell in neighb:
                 if not cell.clicked:
                     cell.left()

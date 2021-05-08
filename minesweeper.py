@@ -56,10 +56,12 @@ class Database:
         cur = self.con.cursor()
         return cur.execute(
             "SELECT time, name FROM highscores WHERE difficulty=? ORDER BY time ASC",
-            (difficulty,)
+            (difficulty,),
         ).fetchall()
 
-    def is_highscore(self, difficulty: int, time: int) -> t.Tuple[bool, t.Optional[int]]:
+    def is_highscore(
+        self, difficulty: int, time: int
+    ) -> t.Tuple[bool, t.Optional[int]]:
         """Test if a score is in the leaderboard.
 
         Also returns the lowest highscore for increased performance, or None if there are less than ten of them
@@ -67,7 +69,7 @@ class Database:
         cur = self.con.cursor()
         high_list = cur.execute(
             "SELECT time FROM highscores WHERE difficulty=? ORDER BY time ASC",
-            (difficulty,)
+            (difficulty,),
         ).fetchall()
         if len(high_list) < 10:
             return True, None
@@ -363,9 +365,8 @@ class Minesweeper:
             justify=tk.RIGHT,
         )
 
-        self.remaining.grid(
-            row=self.rows, column=0, columnspan=4, sticky=tk.EW
-        )
+        self.remaining.grid(row=self.rows, column=0,
+                            columnspan=4, sticky=tk.EW)
         self.time_display.grid(
             row=self.rows, column=self.columns - 5, columnspan=4, sticky=tk.EW
         )
@@ -455,7 +456,7 @@ class Minesweeper:
             screen,
             font="arial 20",
             text="New highscore ! Please enter your name",
-            justify=tk.CENTER
+            justify=tk.CENTER,
         )
         text.grid(row=0, column=0, sticky=tk.EW)
         entry = tk.Entry(screen)
@@ -464,25 +465,17 @@ class Minesweeper:
         def submit():
             if not entry.get().strip():
                 messagebox.showerror(
-                    "Invalid operation",
-                    "Your name cannot be blank. Enter a name."
+                    "Invalid operation", "Your name cannot be blank. Enter a name."
                 )
                 return
 
             self.database.insert_highscore(
-                self.difficulty,
-                self.time,
-                entry.get().strip(),
-                lowest
+                self.difficulty, self.time, entry.get().strip(), lowest
             )
             screen.destroy()
             self.endscreen("You won", "It's a victory !", "green3")
 
-        button = tk.Button(
-            screen,
-            command=submit,
-            text="Submit"
-        )
+        button = tk.Button(screen, command=submit, text="Submit")
         button.grid(row=2, column=0)
 
     def endscreen(self, title, content, bg):

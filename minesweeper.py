@@ -21,9 +21,79 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import sqlite3
 import tkinter as tk
 import typing as t
 from random import choice
+from tkinter import messagebox
+
+
+class Database:
+    """Class for managing all SQL-related things."""
+
+    __slots__ = ("con",)
+
+    def __init__(self) -> None:
+        """Initialize the connection."""
+        self.con = sqlite3.connect("minesweeper.db")
+        self.initialize()
+
+    def initialize(self) -> None:
+        """Table creation."""
+        cur = self.con.cursor()
+        cur.execute(
+            """CREATE TABLE IF NOT EXISTS highscores (
+                difficulty INTEGER NOT NULL,
+                time INTEGER NOT NULL,
+                name TEXT NOT NULL
+            )
+            """
+        )
+        self.con.commit()
+
+    def highscores(self, difficulty: int) -> t.List[t.Tuple[int, str]]:
+        """Fetch the highscores."""
+        cur = self.con.cursor()
+        return cur.execute(
+            "SELECT time, name FROM highscores WHERE difficulty=? ORDER BY time ASC",
+            (difficulty,)
+        ).fetchall()
+
+    def is_highscore(self, difficulty: int, time: int) -> t.Tuple[bool, t.Optional[int]]:
+        """Test if a score is in the leaderboard.
+
+        Also returns the lowest highscore for increased performance, or None if there are less than ten of them
+        """
+        cur = self.con.cursor()
+        high_list = cur.execute(
+            "SELECT time FROM highscores WHERE difficulty=? ORDER BY time ASC",
+            (difficulty,)
+        ).fetchall()
+        if len(high_list) < 10:
+            return True, None
+        lowest = high_list[-1]
+        return time < lowest, lowest
+
+    def insert_highscore(
+        self,
+        difficulty: int,
+        time: int,
+        name: str,
+        lowest: t.Optional[int],
+    ) -> None:
+        """Insert a new highscore, deleting the lowest one."""
+        cur = self.con.cursor()
+
+        if lowest is not None:
+            cur.execute(
+                "DELETE FROM highscores WHERE difficulty=? AND time=? LIMIT 1",
+                (difficulty, lowest),
+            )
+        cur.execute(
+            "INSERT INTO highscores VALUES(?, ?, ?)",
+            (difficulty, time, name),
+        )
+        self.con.commit()
 
 
 class Cell:
@@ -120,7 +190,7 @@ class Cell:
                 fill="red",
             )
             self.master.cur_mines -= 1
-        self.master.remaining.config(text=f"Mines: {self.master.cur_mines}")
+        self.master.remaining.config(text=str(self.master.cur_mines))
         self.flagged = not self.flagged
 
     @property
@@ -157,10 +227,32 @@ class Minesweeper:
         "cur_mines",
         "rows",
         "columns",
-        "difficulties",
         "remaining",
         "blank",
         "enabled",
+        "database",
+        "time",
+        "time_display",
+        "game_num",
+        "difficulty",
+    )
+
+    difficulties = (
+        (
+            (1, 60, 10, 8, 8),
+            "Easy",
+            "green",
+        ),
+        (
+            (2, 35, 40, 16, 16),
+            "Medium",
+            "midnight blue",
+        ),
+        (
+            (3, 30, 99, 16, 32),
+            "Hard",
+            "red3",
+        ),
     )
 
     def __init__(self) -> None:
@@ -172,27 +264,21 @@ class Minesweeper:
         self.cur_mines = 0
         self.rows = 0
         self.columns = 0
-        self.difficulties = (
-            {
-                "text": "Easy",
-                "bg": "green",
-                "command": self.gen_game(60, 10, 8, 8),
-            },
-            {
-                "text": "Medium",
-                "bg": "midnight blue",
-                "command": self.gen_game(35, 40, 16, 16),
-            },
-            {"text": "Hard", "bg": "red3", "command": self.gen_game(30, 99, 16, 32)},
-        )
         self.remaining: tk.Label = None
         self.blank = True  # Not clicked yet
         self.enabled = True  # Lock the grid after the game is finished
+        self.database = Database()
+        self.time = 0
+        self.time_display: tk.Label = None
+        self.game_num = 0
+        self.difficulty = 0
+        # Solve potential issue with incr_time running multiple times
 
-    def gen_game(self, size, mines, rows, columns) -> t.Callable:
+    def gen_game(self, difficulty, size, mines, rows, columns) -> t.Callable:
         """Generate callables for the different difficulties."""
 
         def predictate() -> None:
+            self.difficulty = difficulty
             self.size = size
             self.mines = mines
             self.cur_mines = mines
@@ -205,8 +291,21 @@ class Minesweeper:
 
         return predictate
 
+    def incr_time(self, game_num: int) -> None:
+        """Increment the time and time display."""
+        if self.game_num == game_num and self.enabled:
+            self.time += 1
+            try:
+                self.time_display.config(text=str(self.time))
+            except tk.TclError:
+                return  # window killed
+            self.main.after(1000, self.incr_time, game_num)
+
     def start(self) -> None:
         """First screen."""
+        self.game_num += 1
+        self.time = 0
+
         self.main = tk.Tk()
         self.main.title("Minesweeper")
         text = tk.Label(
@@ -219,8 +318,15 @@ class Minesweeper:
         )
         text.grid(column=0, row=0)
 
-        for i, args in enumerate(self.difficulties):
-            button = tk.Button(self.main, fg="white", font="arial 20", **args)
+        for i, conf in enumerate(self.difficulties):
+            button = tk.Button(
+                self.main,
+                fg="white",
+                font="arial 20",
+                command=self.gen_game(*conf[0]),
+                text=conf[1],
+                bg=conf[2],
+            )
             button.grid(column=0, row=i + 1, sticky=tk.NSEW)
         self.main.resizable(False, False)
         self.main.mainloop()
@@ -244,11 +350,24 @@ class Minesweeper:
             fg="white",
             font="arial 20",
             relief="flat",
-            text=f"Mines: {self.cur_mines}",
-            justify=tk.CENTER,
+            text=str(self.cur_mines),
+            justify=tk.LEFT,
         )
+        self.time_display = tk.Label(
+            self.main,
+            bg="gray30",
+            fg="white",
+            font="arial 20",
+            relief="flat",
+            text="0",
+            justify=tk.RIGHT,
+        )
+
         self.remaining.grid(
-            row=self.rows, column=0, columnspan=self.columns, sticky=tk.EW
+            row=self.rows, column=0, columnspan=4, sticky=tk.EW
+        )
+        self.time_display.grid(
+            row=self.rows, column=self.columns - 5, columnspan=4, sticky=tk.EW
         )
 
         self.grid = [
@@ -279,6 +398,7 @@ class Minesweeper:
 
     def first_click(self, i: int, j: int) -> None:
         """Plant the mines."""
+        self.main.after(1000, self.incr_time, self.game_num)
         self.blank = False
         for _ in range(self.mines):
             x, y = i, j
@@ -321,7 +441,49 @@ class Minesweeper:
 
     def win(self) -> None:
         """Win the game."""
+        test, lowest = self.database.is_highscore(self.difficulty, self.time)
+        if test:
+            self.new_highscore(lowest)
+            return
         self.endscreen("You won", "It's a victory !", "green3")
+
+    def new_highscore(self, lowest) -> None:
+        """Add a new highscore."""
+        screen = tk.Tk()
+        screen.title("New highscore !")
+        text = tk.Label(
+            screen,
+            font="arial 20",
+            text="New highscore ! Please enter your name",
+            justify=tk.CENTER
+        )
+        text.grid(row=0, column=0, sticky=tk.EW)
+        entry = tk.Entry(screen)
+        entry.grid(row=1, column=0)
+
+        def submit():
+            if not entry.get().strip():
+                messagebox.showerror(
+                    "Invalid operation",
+                    "Your name cannot be blank. Enter a name."
+                )
+                return
+
+            self.database.insert_highscore(
+                self.difficulty,
+                self.time,
+                entry.get().strip(),
+                lowest
+            )
+            screen.destroy()
+            self.endscreen("You won", "It's a victory !", "green3")
+
+        button = tk.Button(
+            screen,
+            command=submit,
+            text="Submit"
+        )
+        button.grid(row=2, column=0)
 
     def endscreen(self, title, content, bg):
         """Draw the endscreen."""
@@ -364,8 +526,16 @@ class Minesweeper:
             command=stop,
         )
 
-        restart_btn.grid(row=1, column=0, sticky=tk.EW)
-        quit_btn.grid(row=2, column=0, sticky=tk.EW)
+        restart_btn.grid(row=1, column=0, sticky=tk.NSEW)
+        quit_btn.grid(row=2, column=0, sticky=tk.NSEW)
+
+        highscores = tk.Listbox(screen, selectmode=tk.SINGLE, width=30)
+
+        for time, name in self.database.highscores(self.difficulty):
+            highscores.insert(tk.END, f"{time} - {name}")
+
+        highscores.grid(row=0, column=1, rowspan=3, sticky=tk.NS)
+
         screen.resizable(False, False)
         screen.mainloop()
 

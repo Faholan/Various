@@ -45,7 +45,8 @@ class Database:
             """CREATE TABLE IF NOT EXISTS highscores (
                 difficulty INTEGER NOT NULL,
                 time INTEGER NOT NULL,
-                name TEXT NOT NULL
+                name TEXT NOT NULL,
+                rowid INTEGER PRIMARY KEY
             )
             """
         )
@@ -88,7 +89,7 @@ class Database:
 
         if lowest is not None:
             cur.execute(
-                "DELETE FROM highscores WHERE difficulty=? AND time=? LIMIT 1",
+                "DELETE FROM highscores WHERE rowid IN (SELECT rowid FROM highscores WHERE difficulty=? AND time=? LIMIT 1)",
                 (difficulty, lowest),
             )
         cur.execute(

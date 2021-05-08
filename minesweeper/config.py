@@ -45,10 +45,7 @@ DIFFICULTIES = (
     },
 )
 
-DIFFICULTY_BUTTON = {
-    "fg": "white",
-    "font": "arial 20"
-}
+DIFFICULTY_BUTTON = {"fg": "white", "font": "arial 20"}
 
 # Game
 GAME_TITLE = "Minesweeper"
@@ -67,7 +64,7 @@ TIME_DISPLAY = {
     "fg": "white",
     "font": "arial 20",
     "relief": "flat",
-    "justify": "right"
+    "justify": "right",
 }
 
 # Losing
@@ -96,7 +93,7 @@ WIN_END = {
         "fg": "white",
         "text": "It's a victory !",
         "justify": "center",
-        "font": "arial 20"
+        "font": "arial 20",
     },
 }
 
@@ -108,7 +105,7 @@ LOSE_END = {
         "fg": "white",
         "text": "It's a loss !",
         "justify": "center",
-        "font": "arial 20"
+        "font": "arial 20",
     },
 }
 

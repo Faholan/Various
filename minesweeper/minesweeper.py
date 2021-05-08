@@ -132,10 +132,7 @@ class Cell:
         self.master = master
         self.size = self.master.cell_size
         self.canvas = tk.Canvas(
-            master.main,
-            width=self.size,
-            height=self.size,
-            **config.CELL_ARGS
+            master.main, width=self.size, height=self.size, **config.CELL_ARGS
         )
         self.coords = (i, j)
         self.value = 0
@@ -322,10 +319,7 @@ class Minesweeper:
 
         self.main = tk.Tk()
         self.main.title(config.SELECT_TITLE)
-        text = tk.Label(
-            self.main,
-            **config.SELECT_TEXT
-        )
+        text = tk.Label(self.main, **config.SELECT_TEXT)
         text.grid(column=0, row=0)
 
         for diff, args in enumerate(config.DIFFICULTIES):
@@ -334,7 +328,7 @@ class Minesweeper:
                 command=self.gen_game(diff + 1, args),
                 text=args["name"],
                 bg=args["button_color"],
-                **config.DIFFICULTY_BUTTON
+                **config.DIFFICULTY_BUTTON,
             )
             button.grid(column=0, row=diff + 1, sticky=tk.NSEW)
         self.main.resizable(False, False)
@@ -347,9 +341,7 @@ class Minesweeper:
         self.main.title(config.GAME_TITLE)
         self.main.config(bg=config.GAME_BG)
         self.remaining = tk.Label(
-            self.main,
-            text=str(self.cur_mines),
-            **config.REMAINING_MINES
+            self.main, text=str(self.cur_mines), **config.REMAINING_MINES
         )
         self.time_display = tk.Label(
             self.main,
@@ -464,16 +456,8 @@ class Minesweeper:
             screen.destroy()
             self.start()
 
-        restart_btn = tk.Button(
-            screen,
-            command=restart,
-            **config.RESTART_BTN
-        )
-        quit_btn = tk.Button(
-            screen,
-            command=stop,
-            **config.QUIT_BTN
-        )
+        restart_btn = tk.Button(screen, command=restart, **config.RESTART_BTN)
+        quit_btn = tk.Button(screen, command=stop, **config.QUIT_BTN)
 
         restart_btn.grid(row=1, column=0, sticky=tk.NSEW)
         quit_btn.grid(row=2, column=0, sticky=tk.NSEW)

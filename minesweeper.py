@@ -73,7 +73,7 @@ class Database:
         ).fetchall()
         if len(high_list) < 10:
             return True, None
-        lowest = high_list[-1]
+        lowest = high_list[-1][0]
         return time < lowest, lowest
 
     def insert_highscore(

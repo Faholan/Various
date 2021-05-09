@@ -12,8 +12,8 @@ FLAG_COLOR = "red"
 # Selection screen
 SELECT_TITLE = "Minesweeper"
 SELECT_TEXT = {
-    "bg": "gray30",
-    "fg": "white",
+    "bg": "cyan",
+    "fg": "black",
     "font": "arial 20",
     "text": "Choose the difficulty",
     "justify": "center",
@@ -74,7 +74,7 @@ DISPLAY_MINES = "purple4"  # Color in which the mines are displayed at the end
 # Highscore
 HIGHSCORE_TEXT = {
     "font": "arial 20",
-    "text": "New highscore ! Please enter your name",
+    "text": "New highscore! Please enter your name",
     "justify": "center",
 }
 

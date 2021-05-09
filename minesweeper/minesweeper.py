@@ -143,7 +143,7 @@ class Minesweeper:
         self.main.title(config.GAME_TITLE)
         self.main.config(bg=config.GAME_BG)
 
-        self.frame = tk.Frame(self.main)
+        self.frame = tk.Frame(self.main, **config.FRAME)
 
         self.remaining = tk.Label(
             self.main, text=str(self.cur_mines), **config.REMAINING_MINES
@@ -155,10 +155,10 @@ class Minesweeper:
             [Cell(self, i, j) for j in range(self.columns)] for i in range(self.rows)
         ]
 
-        self.frame.grid(row=0, column=0, columnspan=4)
+        self.frame.grid(**config.FRAME_GRID)
 
-        self.remaining.grid(row=1, column=0, sticky=tk.EW)
-        self.time_display.grid(row=1, column=3, sticky=tk.EW)
+        self.remaining.grid(**config.REMAINING_GRID)
+        self.time_display.grid(**config.TIME_GRID)
 
         self.main.resizable(False, False)
         self.main.focus_force()

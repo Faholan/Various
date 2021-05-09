@@ -12,7 +12,7 @@ FLAG_COLOR = "red"
 # Selection screen
 SELECT_TITLE = "Minesweeper"
 SELECT_TEXT = {
-    "bg": "cyan",
+    "bg": "blanched almond",
     "fg": "black",
     "font": "arial 20",
     "text": "Choose the difficulty",
@@ -49,22 +49,44 @@ DIFFICULTY_BUTTON = {"fg": "white", "font": "arial 20"}
 
 # Game
 GAME_TITLE = "Minesweeper"
-GAME_BG = "gray30"
+GAME_BG = "bisque"
+
+FRAME = {}
 
 REMAINING_MINES = {
-    "bg": "gray30",
-    "fg": "white",
+    "bg": "bisque",
+    "fg": "blue",
     "font": "arial 20",
     "relief": "flat",
     "justify": "left",
 }
 
 TIME_DISPLAY = {
-    "bg": "gray30",
-    "fg": "white",
+    "bg": "bisque",
+    "fg": "blue",
     "font": "arial 20",
     "relief": "flat",
     "justify": "right",
+}
+
+FRAME_GRID = {
+    "row": 0,
+    "column": 0,
+    "columnspan": 4,
+}
+
+REMAINING_GRID = {
+    "row": 1,
+    "column": 0,
+    "sticky": "w",
+    "padx": 20,
+}
+
+TIME_GRID = {
+    "row": 1,
+    "column": 3,
+    "sticky": "e",
+    "padx": 20,
 }
 
 # Losing

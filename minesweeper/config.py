@@ -1,3 +1,5 @@
+"""Minesweeper configuration."""
+
 CELL_ARGS = {
     "bg": "gray80",
     "highlightbackground": "gray4",
@@ -106,6 +108,22 @@ HIGHSCORE_BUTTON = {
     "text": "Submit",
 }
 
+HIGHSCORE_TEXT_GRID = {
+    "row": 0,
+    "column": 0,
+    "sticky": "ew",
+}
+
+HIGHSCORE_ENTRY_GRID = {
+    "row": 1,
+    "column": 0,
+}
+
+HIGHSCORE_BUTTON_GRID = {
+    "row": 2,
+    "column": 0,
+}
+
 # End screen
 WIN_END = {
     "title": "You won",
@@ -148,4 +166,29 @@ QUIT_BTN = {
 HIGHSCORE_LIST = {
     "selectmode": "single",
     "width": 30,
+}
+
+END_TEXT_GRID = {
+    "row": 0,
+    "column": 0,
+    "sticky": "ew",
+}
+
+RESTART_GRID = {
+    "row": 1,
+    "column": 0,
+    "sticky": "nsew",
+}
+
+QUIT_GRID = {
+    "row": 2,
+    "column": 0,
+    "sticky": "nsew",
+}
+
+HIGHSCORE_GRID = {
+    "row": 0,
+    "column": 1,
+    "rowspan": 3,
+    "sticky": "ns",
 }

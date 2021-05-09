@@ -1,3 +1,5 @@
+"""Implementation of a minesweeper cell."""
+
 import tkinter as tk
 
 from . import config

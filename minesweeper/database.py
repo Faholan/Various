@@ -1,3 +1,5 @@
+"""Connection to the database for highscores."""
+
 import sqlite3
 import typing as t
 
@@ -5,7 +7,7 @@ import typing as t
 class Database:
     """Class for managing all SQL-related things."""
 
-    __slots__ = ("con",)
+    __slots__ = "con"
 
     def __init__(self) -> None:
         """Initialize the connection."""

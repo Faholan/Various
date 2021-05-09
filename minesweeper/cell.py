@@ -34,7 +34,7 @@ class Cell:
         self.master = master
         self.size = self.master.cell_size
         self.canvas = tk.Canvas(
-            master.main, width=self.size, height=self.size, **config.CELL_ARGS
+            master.frame, width=self.size, height=self.size, **config.CELL_ARGS
         )
         self.coords = (i, j)
         self.value = 0

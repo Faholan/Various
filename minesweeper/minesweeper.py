@@ -26,6 +26,7 @@ class Minesweeper:
         "time_display",
         "game_num",
         "difficulty",
+        "frame",
     )
 
     def __init__(self) -> None:
@@ -45,6 +46,7 @@ class Minesweeper:
         self.time_display: tk.Label = None
         self.game_num = 0
         self.difficulty = 0
+        self.frame: tk.Frame = None
         # Solve potential issue with incr_time running multiple times
 
     def incr_time(self, game_num: int) -> None:
@@ -140,20 +142,24 @@ class Minesweeper:
         self.main = tk.Tk()
         self.main.title(config.GAME_TITLE)
         self.main.config(bg=config.GAME_BG)
+
+        self.frame = tk.Frame(self.main)
+
         self.remaining = tk.Label(
             self.main, text=str(self.cur_mines), **config.REMAINING_MINES
         )
 
         self.time_display = tk.Label(self.main, text="0", **config.TIME_DISPLAY)
 
-        self.remaining.grid(row=self.rows, column=0, columnspan=4, sticky=tk.EW)
-        self.time_display.grid(
-            row=self.rows, column=self.columns - 5, columnspan=4, sticky=tk.EW
-        )
-
         self.grid = [
             [Cell(self, i, j) for j in range(self.columns)] for i in range(self.rows)
         ]
+
+        self.frame.grid(row=0, column=0, columnspan=4)
+
+        self.remaining.grid(row=1, column=0, sticky=tk.EW)
+        self.time_display.grid(row=1, column=3, sticky=tk.EW)
+
         self.main.resizable(False, False)
         self.main.focus_force()
 

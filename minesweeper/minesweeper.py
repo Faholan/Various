@@ -10,7 +10,6 @@ from .database import Database
 
 class Minesweeper:
     """Main class, actually implement the game."""
-
     __slots__ = (
         "main",
         "grid",
@@ -145,7 +144,7 @@ class Minesweeper:
             self.main, text=str(self.cur_mines), **config.REMAINING_MINES
         )
 
-        self.time_display = tk.Label(self.main, text="0", **config.TIME_DISPLAY,)
+        self.time_display = tk.Label(self.main, text="0", **config.TIME_DISPLAY)
 
         self.remaining.grid(row=self.rows, column=0, columnspan=4, sticky=tk.EW)
         self.time_display.grid(
@@ -165,9 +164,11 @@ class Minesweeper:
         for _ in range(self.mines):
             x, y = i, j
             cell = self.grid[i][j]
+
             while (abs(x - i) <= 1 and abs(y - j) <= 1) or cell.ismine:
                 cell = choice(choice(self.grid))
                 x, y = cell.coords
+
             cell.ismine = True
 
             for cell in self.neighbours(x, y):
@@ -201,6 +202,7 @@ class Minesweeper:
                     cell.canvas.config(bg=config.WRONG_FLAG)
                 elif cell.coords != (i, j) and cell.ismine:
                     cell.canvas.config(bg=config.DISPLAY_MINES)
+
         self.endscreen(config.LOSE_END)
 
     def win(self) -> None:
@@ -214,7 +216,7 @@ class Minesweeper:
     def new_highscore(self, lowest) -> None:
         """Add a new highscore."""
         screen = tk.Tk()
-        screen.title("New highscore !")
+        screen.title("New highscore!")
         text = tk.Label(screen, config.HIGHSCORE_TEXT)
         text.grid(row=0, column=0, sticky=tk.EW)
         entry = tk.Entry(screen, **config.HIGHSCORE_ENTRY)

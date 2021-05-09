@@ -12,8 +12,8 @@ FLAG_COLOR = "red"
 # Selection screen
 SELECT_TITLE = "Minesweeper"
 SELECT_TEXT = {
-    "bg": "gray30",
-    "fg": "white",
+    "bg": "cyan",
+    "fg": "black",
     "font": "arial 20",
     "text": "Choose the difficulty",
     "justify": "center",

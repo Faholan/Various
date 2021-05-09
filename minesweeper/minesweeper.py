@@ -43,7 +43,6 @@ class Database:
     def __del__(self) -> None:
         """Do some cleanup."""
         self.con.close()
-        super().__del__()
 
     def initialize(self) -> None:
         """Table creation."""

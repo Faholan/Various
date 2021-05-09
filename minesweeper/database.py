@@ -57,7 +57,11 @@ class Database:
         return time < lowest, lowest
 
     def insert_highscore(
-        self, difficulty: int, time: int, name: str, lowest: t.Optional[int],
+        self,
+        difficulty: int,
+        time: int,
+        name: str,
+        lowest: t.Optional[int],
     ) -> None:
         """Insert a new highscore, deleting the lowest one."""
         cur = self.con.cursor()
@@ -69,6 +73,7 @@ class Database:
             )
 
         cur.execute(
-            "INSERT INTO highscores VALUES(?, ?, ?)", (difficulty, time, name),
+            "INSERT INTO highscores VALUES(?, ?, ?)",
+            (difficulty, time, name),
         )
         self.con.commit()

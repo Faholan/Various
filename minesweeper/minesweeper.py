@@ -10,6 +10,7 @@ from .database import Database
 
 class Minesweeper:
     """Main class, actually implement the game."""
+
     __slots__ = (
         "main",
         "grid",
@@ -149,7 +150,8 @@ class Minesweeper:
             self.main, text=str(self.cur_mines), **config.REMAINING_MINES
         )
 
-        self.time_display = tk.Label(self.main, text="0", **config.TIME_DISPLAY)
+        self.time_display = tk.Label(
+            self.main, text="0", **config.TIME_DISPLAY)
 
         self.grid = [
             [Cell(self, i, j) for j in range(self.columns)] for i in range(self.rows)
@@ -231,7 +233,8 @@ class Minesweeper:
         def submit():
             if not entry.get().strip():
                 messagebox.showerror(
-                    "Invalid operation", "Your name cannot be blank. Enter a name.",
+                    "Invalid operation",
+                    "Your name cannot be blank. Enter a name.",
                 )
                 return
 

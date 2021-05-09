@@ -74,7 +74,7 @@ DISPLAY_MINES = "purple4"  # Color in which the mines are displayed at the end
 # Highscore
 HIGHSCORE_TEXT = {
     "font": "arial 20",
-    "text": "New highscore ! Please enter your name",
+    "text": "New highscore! Please enter your name",
     "justify": "center",
 }
 

@@ -114,4 +114,9 @@ dmypy.json
 .pyre/
 
 # Custom ignore
-minesweeper.db
+*.db
+*.sqlite
+*.sqlite3
+
+.vscode/
+.idea/

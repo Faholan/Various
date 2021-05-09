@@ -40,6 +40,11 @@ class Database:
         self.con = sqlite3.connect("minesweeper.db")
         self.initialize()
 
+    def __del__(self) -> None:
+        """Do some cleanup."""
+        self.con.close()
+        super().__del__()
+
     def initialize(self) -> None:
         """Table creation."""
         cur = self.con.cursor()
@@ -450,6 +455,7 @@ class Minesweeper:
         def stop():
             self.main.destroy()
             screen.destroy()
+            self.database.con.close()
 
         def restart():
             self.main.destroy()

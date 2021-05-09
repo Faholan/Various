@@ -250,6 +250,7 @@ class Minesweeper:
         def stop():
             self.main.destroy()
             screen.destroy()
+            self.database.con.close()
 
         def restart():
             self.main.destroy()

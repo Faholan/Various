@@ -1,224 +1,14 @@
-"""MIT License.
+"""Minesweeper game."""
 
-Copyright (c) 2021 Faholan
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-"""
-
-import sqlite3
+import getpass
 import tkinter as tk
 import typing as t
 from random import choice
 from tkinter import messagebox
 
-import config
-
-
-class Database:
-    """Class for managing all SQL-related things."""
-
-    __slots__ = ("con",)
-
-    def __init__(self) -> None:
-        """Initialize the connection."""
-        self.con = sqlite3.connect("minesweeper.db")
-        self.initialize()
-
-    def __del__(self) -> None:
-        """Do some cleanup."""
-        self.con.close()
-
-    def initialize(self) -> None:
-        """Table creation."""
-        cur = self.con.cursor()
-        cur.execute(
-            """CREATE TABLE IF NOT EXISTS highscores (
-                difficulty INTEGER NOT NULL,
-                time INTEGER NOT NULL,
-                name TEXT NOT NULL,
-                rowid INTEGER PRIMARY KEY
-            )
-            """
-        )
-        self.con.commit()
-
-    def highscores(self, difficulty: int) -> t.List[t.Tuple[int, str]]:
-        """Fetch the highscores."""
-        cur = self.con.cursor()
-        return cur.execute(
-            "SELECT time, name FROM highscores WHERE difficulty=? ORDER BY time ASC",
-            (difficulty,),
-        ).fetchall()
-
-    def is_highscore(
-        self, difficulty: int, time: int
-    ) -> t.Tuple[bool, t.Optional[int]]:
-        """Test if a score is in the leaderboard.
-
-        Also returns the lowest highscore for increased performance, or None if there are less than ten of them
-        """
-        cur = self.con.cursor()
-        high_list = cur.execute(
-            "SELECT time FROM highscores WHERE difficulty=? ORDER BY time ASC",
-            (difficulty,),
-        ).fetchall()
-        if len(high_list) < 10:
-            return True, None
-        lowest = high_list[-1][0]
-        return time < lowest, lowest
-
-    def insert_highscore(
-        self,
-        difficulty: int,
-        time: int,
-        name: str,
-        lowest: t.Optional[int],
-    ) -> None:
-        """Insert a new highscore, deleting the lowest one."""
-        cur = self.con.cursor()
-
-        if lowest is not None:
-            cur.execute(
-                "DELETE FROM highscores WHERE rowid IN (SELECT rowid FROM highscores WHERE difficulty=? AND time=? LIMIT 1)",
-                (difficulty, lowest),
-            )
-        cur.execute(
-            "INSERT INTO highscores VALUES(?, ?, ?, NULL)",
-            (difficulty, time, name),
-        )
-        self.con.commit()
-
-
-class Cell:
-    """Implement one cell."""
-
-    __slots__ = (
-        "master",
-        "size",
-        "canvas",
-        "coords",
-        "value",
-        "ismine",
-        "flagged",
-        "clicked",
-    )
-
-    colours = (
-        "gray4",
-        "blue",
-        "green",
-        "red",
-        "purple4",
-        "brown4",
-        "dark green",
-        "black",
-        "white",
-    )
-
-    def __init__(self, master, i, j):
-        """Initialize the cell."""
-        self.master = master
-        self.size = self.master.cell_size
-        self.canvas = tk.Canvas(
-            master.main, width=self.size, height=self.size, **config.CELL_ARGS
-        )
-        self.coords = (i, j)
-        self.value = 0
-        self.canvas.bind("<Button-1>", self.left)
-        self.canvas.bind("<Button-3>", self.flag)
-        self.ismine = False
-        self.flagged = False
-        self.clicked = False
-        self.canvas.grid(row=i, column=j)
-
-    def left(self, _=None) -> None:
-        """Implement left clicking."""
-        if self.flagged or not self.master.enabled:
-            return
-        if self.master.blank:
-            self.master.first_click(*self.coords)
-        if self.clicked:
-            self.master.second_click(*self.coords)
-            return
-        if self.ismine:
-            self.canvas.config(bg=config.MINE_COLOR)
-            self.master.enabled = False
-            self.master.lose(*self.coords)
-            return
-        self.click()
-        if not self.value:
-            self.master.zero(*self.coords)
-        if self.master.completed():
-            self.master.enabled = False
-            self.master.win()
-
-    def flag(self, _=None) -> None:
-        """Flag thyself."""
-        if self.clicked or not self.master.enabled:
-            return
-        if self.flagged:
-            self.canvas.delete(tk.ALL)
-            self.master.cur_mines += 1
-        else:
-            self.canvas.create_line(
-                17 * self.size / 48,
-                3 * self.size / 16,
-                17 * self.size / 48,
-                71 * self.size / 80,
-                fill=config.FLAG_COLOR,
-                width=2,
-            )
-            self.canvas.create_polygon(
-                17 * self.size / 48,
-                3 * self.size / 16,
-                19 * self.size / 24,
-                63 * self.size / 160,
-                17 * self.size / 48,
-                3 * self.size / 5,
-                outline="",
-                fill=config.FLAG_COLOR,
-            )
-            self.master.cur_mines -= 1
-        self.master.remaining.config(text=str(self.master.cur_mines))
-        self.flagged = not self.flagged
-
-    @property
-    def colour(self) -> str:
-        """Get the colour associated to the value."""
-        return self.colours[self.value]
-
-    def click(self) -> None:
-        """Fill the cell with color."""
-        if self.flagged:
-            self.flag()
-        self.clicked = True
-        if self.value:
-            self.canvas.config(bg=config.CELL_CLICKED)
-            self.canvas.create_text(
-                self.size / 2,
-                self.size / 2,
-                text=str(self.value),
-                fill=self.colour,
-                font=config.CELL_FONT,
-            )
-        else:
-            self.canvas.config(bg=config.CELL_ZERO)
+from . import config
+from .cell import Cell
+from .database import Database
 
 
 class Minesweeper:
@@ -226,40 +16,52 @@ class Minesweeper:
 
     __slots__ = (
         "main",
-        "grid",
+        "frame",
+        "remaining",
+        "time_display",
+        "time",
         "cell_size",
-        "mines",
-        "cur_mines",
+        "grid",
         "rows",
         "columns",
-        "remaining",
+        "mines",
+        "cur_mines",
+        "database",
         "blank",
         "enabled",
-        "database",
-        "time",
-        "time_display",
         "game_num",
         "difficulty",
+        "highscore_screen",
     )
 
     def __init__(self) -> None:
         """Initialize the minesweeper."""
-        self.main: tk.Tk = None
-        self.grid: t.List[t.List[Cell]] = []
+        self.main: tk.Tk = None  # type: ignore
+        self.frame: tk.Frame = None  # type: ignore
+        self.remaining: tk.Label = None  # type: ignore
+        self.time_display: tk.Label = None  # type: ignore
+        self.time = 0
+
         self.cell_size = 0
-        self.mines = 0
-        self.cur_mines = 0
+
+        self.grid: t.List[t.List[Cell]] = []
+
         self.rows = 0
         self.columns = 0
-        self.remaining: tk.Label = None
+
+        self.mines = 0
+        self.cur_mines = 0
+
+        self.database = Database()
+
         self.blank = True  # Not clicked yet
         self.enabled = True  # Lock the grid after the game is finished
-        self.database = Database()
-        self.time = 0
-        self.time_display: tk.Label = None
+
         self.game_num = 0
         self.difficulty = 0
         # Solve potential issue with incr_time running multiple times
+
+        self.highscore_screen: tk.Tk = None  # type: ignore
 
     def incr_time(self, game_num: int) -> None:
         """Increment the time and time display."""
@@ -269,12 +71,13 @@ class Minesweeper:
                 self.time_display.config(text=str(self.time))
             except tk.TclError:
                 return  # window killed
+
             self.main.after(1000, self.incr_time, game_num)
 
     def gen_game(self, difficulty: int, args) -> t.Callable:
         """Generate callables for the different difficulties."""
 
-        def predictate() -> None:
+        def predicate() -> None:
             self.difficulty = difficulty
             self.cell_size = args["cell_size"]
             self.mines = self.cur_mines = args["mines"]
@@ -285,7 +88,7 @@ class Minesweeper:
             self.main.destroy()
             self.game()
 
-        return predictate
+        return predicate
 
     def completed(self) -> bool:
         """Check if all non-mined tiles have been clicked."""
@@ -293,6 +96,7 @@ class Minesweeper:
             for cell in row:
                 if not cell.ismine and not cell.clicked:
                     return False
+
         return True
 
     def neighbours(self, i: int, j: int) -> t.List[Cell]:
@@ -300,20 +104,28 @@ class Minesweeper:
         final = []
         if i != 0:
             final.append(self.grid[i - 1][j])
+
         if i != self.rows - 1:
             final.append(self.grid[i + 1][j])
+
         if j != 0:
             final.append(self.grid[i][j - 1])
+
         if j != self.columns - 1:
             final.append(self.grid[i][j + 1])
+
         if 0 not in {i, j}:
             final.append(self.grid[i - 1][j - 1])
+
         if i != self.rows - 1 and j != self.columns - 1:
             final.append(self.grid[i + 1][j + 1])
+
         if i != 0 and j != self.columns - 1:
             final.append(self.grid[i - 1][j + 1])
+
         if i != self.rows - 1 and j != 0:
             final.append(self.grid[i + 1][j - 1])
+
         return final
 
     def start(self) -> None:
@@ -323,18 +135,28 @@ class Minesweeper:
 
         self.main = tk.Tk()
         self.main.title(config.SELECT_TITLE)
-        text = tk.Label(self.main, **config.SELECT_TEXT)
+        text = tk.Label(self.main, config.SELECT_TEXT)
+
         text.grid(column=0, row=0)
 
         for diff, args in enumerate(config.DIFFICULTIES):
             button = tk.Button(
                 self.main,
+                config.DIFFICULTY_BUTTON,
                 command=self.gen_game(diff + 1, args),
-                text=args["name"],
-                bg=args["button_color"],
-                **config.DIFFICULTY_BUTTON,
+                text=args["name"],  # type: ignore
+                bg=args["button_color"],  # type: ignore
             )
             button.grid(column=0, row=diff + 1, sticky=tk.NSEW)
+
+        highscores_button = tk.Button(
+            self.main,
+            config.HIGHSCORES_BUTTON,
+            command=self.display_highscores,
+        )
+
+        highscores_button.grid(config.START_HIGHSCORES_GRID)
+
         self.main.resizable(False, False)
         self.main.focus_force()
         self.main.mainloop()
@@ -343,25 +165,30 @@ class Minesweeper:
         """Actual game."""
         self.main = tk.Tk()
         self.main.title(config.GAME_TITLE)
-        self.main.config(bg=config.GAME_BG)
+        self.main.config(config.GAME_CONFIG)
+
+        self.frame = tk.Frame(self.main, **config.FRAME)
+
         self.remaining = tk.Label(
-            self.main, text=str(self.cur_mines), **config.REMAINING_MINES
-        )
-        self.time_display = tk.Label(
             self.main,
-            text="0",
-            **config.TIME_DISPLAY,
+            config.REMAINING_MINES,
+            text=str(self.cur_mines),
         )
 
-        self.remaining.grid(row=self.rows, column=0,
-                            columnspan=4, sticky=tk.EW)
-        self.time_display.grid(
-            row=self.rows, column=self.columns - 5, columnspan=4, sticky=tk.EW
+        self.time_display = tk.Label(
+            self.main,
+            config.TIME_DISPLAY,
+            text="0",
         )
 
         self.grid = [
             [Cell(self, i, j) for j in range(self.columns)] for i in range(self.rows)
         ]
+
+        self.frame.grid(**config.FRAME_GRID)  # type: ignore
+        self.remaining.grid(**config.REMAINING_GRID)  # type: ignore
+        self.time_display.grid(**config.TIME_GRID)  # type: ignore
+
         self.main.resizable(False, False)
         self.main.focus_force()
 
@@ -372,9 +199,11 @@ class Minesweeper:
         for _ in range(self.mines):
             x, y = i, j
             cell = self.grid[i][j]
+
             while (abs(x - i) <= 1 and abs(y - j) <= 1) or cell.ismine:
                 cell = choice(choice(self.grid))
                 x, y = cell.coords
+
             cell.ismine = True
 
             for cell in self.neighbours(x, y):
@@ -386,13 +215,16 @@ class Minesweeper:
         for cell in self.neighbours(i, j):
             if cell.clicked:
                 continue
+
             cell.click()
+
             if cell.value == 0:
                 self.zero(*cell.coords)
 
     def second_click(self, i: int, j: int) -> None:
         """When you click a cell for the second time."""
         neighb = self.neighbours(i, j)
+
         if sum(1 if cell.flagged else 0 for cell in neighb) == self.grid[i][j].value:
             for cell in neighb:
                 if not cell.clicked:
@@ -406,6 +238,7 @@ class Minesweeper:
                     cell.canvas.config(bg=config.WRONG_FLAG)
                 elif cell.coords != (i, j) and cell.ismine:
                     cell.canvas.config(bg=config.DISPLAY_MINES)
+
         self.endscreen(config.LOSE_END)
 
     def win(self) -> None:
@@ -414,16 +247,30 @@ class Minesweeper:
         if test:
             self.new_highscore(lowest)
             return
+
         self.endscreen(config.WIN_END)
 
     def new_highscore(self, lowest) -> None:
         """Add a new highscore."""
         screen = tk.Tk()
-        screen.title("New highscore !")
-        text = tk.Label(screen, config.HIGHSCORE_TEXT)
-        text.grid(row=0, column=0, sticky=tk.EW)
-        entry = tk.Entry(screen, **config.HIGHSCORE_ENTRY)
-        entry.grid(row=1, column=0)
+        screen.title("New highscore!")
+        screen.config(config.HIGHSCORE_CONFIG)
+
+        text = tk.Label(
+            screen,
+            config.HIGHSCORE_LABEL,
+            text=config.HIGHSCORE_TEXT.format(time=self.time),
+        )
+
+        entry = tk.Entry(screen, config.HIGHSCORE_ENTRY)
+
+        try:
+            entry.insert(tk.END, getpass.getuser())
+        except Exception:
+            # getpass.getuser may raise an exception, but the docs don't
+            # specify what exception may be raised.
+            # For example, under Windows, it may be an ImportError
+            pass
 
         def submit():
             if not entry.get().strip():
@@ -439,8 +286,16 @@ class Minesweeper:
             screen.destroy()
             self.endscreen(config.WIN_END)
 
-        button = tk.Button(screen, command=submit, **config.HIGHSCORE_BUTTON)
-        button.grid(row=2, column=0)
+        button = tk.Button(
+            screen,
+            config.HIGHSCORE_BUTTON,
+            command=submit,
+        )
+
+        text.grid(config.HIGHSCORE_LABEL_GRID)
+        entry.grid(config.HIGHSCORE_ENTRY_GRID)
+        button.grid(config.HIGHSCORE_BUTTON_GRID)
+
         screen.focus_force()
 
     def endscreen(self, args):
@@ -449,40 +304,81 @@ class Minesweeper:
         screen.title(args["title"])
         screen.config(bg=args["bg"])
         text = tk.Label(screen, **args["text"])
-        text.grid(row=0, column=0, sticky=tk.EW)
 
         def stop():
-            self.main.destroy()
+            try:
+                self.main.destroy()
+            except tk.TclError:
+                # Main already closed
+                pass
             screen.destroy()
             self.database.con.close()
 
         def restart():
-            self.main.destroy()
+            try:
+                self.main.destroy()
+            except tk.TclError:
+                # main already closed
+                pass
             screen.destroy()
             self.start()
 
         restart_btn = tk.Button(screen, command=restart, **config.RESTART_BTN)
         quit_btn = tk.Button(screen, command=stop, **config.QUIT_BTN)
 
-        restart_btn.grid(row=1, column=0, sticky=tk.NSEW)
-        quit_btn.grid(row=2, column=0, sticky=tk.NSEW)
-
-        highscores = tk.Listbox(screen, **config.HIGHSCORE_LIST)
+        highscores = tk.Listbox(screen, config.END_HIGHSCORE_LIST)
 
         for time, name in self.database.highscores(self.difficulty):
             highscores.insert(tk.END, f"{time} s - {name}")
 
-        highscores.grid(row=0, column=1, rowspan=3, sticky=tk.NS)
+        highscores_button = tk.Button(
+            screen,
+            config.HIGHSCORES_BUTTON,
+            command=self.display_highscores,
+        )
+
+        text.grid(**config.END_TEXT_GRID)
+        restart_btn.grid(**config.RESTART_GRID)
+        quit_btn.grid(**config.QUIT_GRID)
+        highscores.grid(**config.HIGHSCORE_GRID)
+        highscores_button.grid(**config.END_HIGHSCORES_GRID)
 
         screen.resizable(False, False)
         screen.focus_force()
         screen.mainloop()
 
+    def display_highscores(self) -> None:
+        """Display the various highscores."""
+        if self.highscore_screen is not None:
+            try:
+                self.highscore_screen.focus_force()
+            except tk.TclError:
+                self.draw_highscores()
+        else:
+            self.draw_highscores()
 
-def main():
-    """Start the game."""
-    Minesweeper().start()
+    def draw_highscores(self) -> None:
+        """Draw a window to display the various highscores."""
+        self.highscore_screen = tk.Tk()
 
+        self.highscore_screen.title(config.HIGHSCORES_TITLE)
+        self.highscore_screen.config(config.HIGHSCORES_CONFIG)
 
-if __name__ == "__main__":
-    main()
+        for diff in range(3):
+            tk.Label(
+                self.highscore_screen,
+                config.HIGHSCORES_LABELS,
+                text=config.HIGHSCORES_TITLES[diff],
+            ).grid(row=0, column=diff)
+            highscores = tk.Listbox(
+                self.highscore_screen,
+                config.HIGHSCORES_LISTS,
+            )
+
+            for time, name in self.database.highscores(diff + 1):
+                highscores.insert(tk.END, f"{time} s - {name}")
+
+            highscores.grid(row=1, column=diff, sticky="nsew")
+
+        self.highscore_screen.resizable(False, False)
+        self.highscore_screen.focus_force()

@@ -31,6 +31,7 @@ class Minesweeper:
         "enabled",
         "game_num",
         "difficulty",
+        "highscore_screen",
     )
 
     def __init__(self) -> None:
@@ -59,6 +60,8 @@ class Minesweeper:
         self.game_num = 0
         self.difficulty = 0
         # Solve potential issue with incr_time running multiple times
+
+        self.highscore_screen: tk.Tk = None  # type: ignore
 
     def incr_time(self, game_num: int) -> None:
         """Increment the time and time display."""
@@ -132,19 +135,27 @@ class Minesweeper:
 
         self.main = tk.Tk()
         self.main.title(config.SELECT_TITLE)
-        text = tk.Label(self.main, **config.SELECT_TEXT)  # type: ignore
+        text = tk.Label(self.main, config.SELECT_TEXT)
 
         text.grid(column=0, row=0)
 
         for diff, args in enumerate(config.DIFFICULTIES):
             button = tk.Button(
                 self.main,
+                config.DIFFICULTY_BUTTON,
                 command=self.gen_game(diff + 1, args),
                 text=args["name"],  # type: ignore
                 bg=args["button_color"],  # type: ignore
-                **config.DIFFICULTY_BUTTON,  # type: ignore
             )
             button.grid(column=0, row=diff + 1, sticky=tk.NSEW)
+
+        highscores_button = tk.Button(
+            self.main,
+            config.HIGHSCORES_BUTTON,
+            command=self.display_highscores,
+        )
+
+        highscores_button.grid(config.START_HIGHSCORES_GRID)
 
         self.main.resizable(False, False)
         self.main.focus_force()
@@ -154,20 +165,20 @@ class Minesweeper:
         """Actual game."""
         self.main = tk.Tk()
         self.main.title(config.GAME_TITLE)
-        self.main.config(bg=config.GAME_BG)
+        self.main.config(config.GAME_CONFIG)
 
         self.frame = tk.Frame(self.main, **config.FRAME)
 
         self.remaining = tk.Label(
             self.main,
+            config.REMAINING_MINES,
             text=str(self.cur_mines),
-            **config.REMAINING_MINES,  # type: ignore
         )
 
         self.time_display = tk.Label(
             self.main,
+            config.TIME_DISPLAY,
             text="0",
-            **config.TIME_DISPLAY,  # type: ignore
         )
 
         self.grid = [
@@ -243,10 +254,15 @@ class Minesweeper:
         """Add a new highscore."""
         screen = tk.Tk()
         screen.title("New highscore!")
+        screen.config(config.HIGHSCORE_CONFIG)
 
-        text = tk.Label(screen, config.HIGHSCORE_TEXT)
+        text = tk.Label(
+            screen,
+            config.HIGHSCORE_LABEL,
+            text=config.HIGHSCORE_TEXT.format(time=self.time),
+        )
 
-        entry = tk.Entry(screen, **config.HIGHSCORE_ENTRY)
+        entry = tk.Entry(screen, config.HIGHSCORE_ENTRY)
 
         try:
             entry.insert(tk.END, getpass.getuser())
@@ -272,13 +288,13 @@ class Minesweeper:
 
         button = tk.Button(
             screen,
+            config.HIGHSCORE_BUTTON,
             command=submit,
-            **config.HIGHSCORE_BUTTON,  # type: ignore
         )
 
-        text.grid(**config.HIGHSCORE_TEXT_GRID)  # type: ignore
-        entry.grid(**config.HIGHSCORE_ENTRY_GRID)  # type: ignore
-        button.grid(**config.HIGHSCORE_BUTTON_GRID)  # type: ignore
+        text.grid(config.HIGHSCORE_LABEL_GRID)
+        entry.grid(config.HIGHSCORE_ENTRY_GRID)
+        button.grid(config.HIGHSCORE_BUTTON_GRID)
 
         screen.focus_force()
 
@@ -290,28 +306,79 @@ class Minesweeper:
         text = tk.Label(screen, **args["text"])
 
         def stop():
-            self.main.destroy()
+            try:
+                self.main.destroy()
+            except tk.TclError:
+                # Main already closed
+                pass
             screen.destroy()
             self.database.con.close()
 
         def restart():
-            self.main.destroy()
+            try:
+                self.main.destroy()
+            except tk.TclError:
+                # main already closed
+                pass
             screen.destroy()
             self.start()
 
         restart_btn = tk.Button(screen, command=restart, **config.RESTART_BTN)
         quit_btn = tk.Button(screen, command=stop, **config.QUIT_BTN)
 
-        highscores = tk.Listbox(screen, **config.HIGHSCORE_LIST)
+        highscores = tk.Listbox(screen, config.END_HIGHSCORE_LIST)
 
         for time, name in self.database.highscores(self.difficulty):
             highscores.insert(tk.END, f"{time} s - {name}")
+
+        highscores_button = tk.Button(
+            screen,
+            config.HIGHSCORES_BUTTON,
+            command=self.display_highscores,
+        )
 
         text.grid(**config.END_TEXT_GRID)
         restart_btn.grid(**config.RESTART_GRID)
         quit_btn.grid(**config.QUIT_GRID)
         highscores.grid(**config.HIGHSCORE_GRID)
+        highscores_button.grid(**config.END_HIGHSCORES_GRID)
 
         screen.resizable(False, False)
         screen.focus_force()
         screen.mainloop()
+
+    def display_highscores(self) -> None:
+        """Display the various highscores."""
+        if self.highscore_screen is not None:
+            try:
+                self.highscore_screen.focus_force()
+            except tk.TclError:
+                self.draw_highscores()
+        else:
+            self.draw_highscores()
+
+    def draw_highscores(self) -> None:
+        """Draw a window to display the various highscores."""
+        self.highscore_screen = tk.Tk()
+
+        self.highscore_screen.title(config.HIGHSCORES_TITLE)
+        self.highscore_screen.config(config.HIGHSCORES_CONFIG)
+
+        for diff in range(3):
+            tk.Label(
+                self.highscore_screen,
+                config.HIGHSCORES_LABELS,
+                text=config.HIGHSCORES_TITLES[diff],
+            ).grid(row=0, column=diff)
+            highscores = tk.Listbox(
+                self.highscore_screen,
+                config.HIGHSCORES_LISTS,
+            )
+
+            for time, name in self.database.highscores(diff + 1):
+                highscores.insert(tk.END, f"{time} s - {name}")
+
+            highscores.grid(row=1, column=diff, sticky="nsew")
+
+        self.highscore_screen.resizable(False, False)
+        self.highscore_screen.focus_force()

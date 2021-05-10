@@ -123,7 +123,9 @@ HIGHSCORE_LABEL = {
     "justify": "center",
 }
 
-HIGHSCORE_TEXT = "You completed the grid in {time} seconds.\nNew highscore! Please enter your name"
+HIGHSCORE_TEXT = (
+    "You completed the grid in {time} seconds.\nNew highscore! Please enter your name"
+)
 
 HIGHSCORE_ENTRY = {
     "bg": "orange3",

@@ -73,7 +73,7 @@ class Database:
             )
 
         cur.execute(
-            "INSERT INTO highscores VALUES(?, ?, ?)",
+            "INSERT INTO highscores VALUES(?, ?, ?, NULL)",
             (difficulty, time, name),
         )
         self.con.commit()

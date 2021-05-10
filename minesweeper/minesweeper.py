@@ -1,5 +1,6 @@
 """Minesweeper game."""
 
+import getpass
 import tkinter as tk
 import typing as t
 from random import choice
@@ -246,6 +247,14 @@ class Minesweeper:
         text = tk.Label(screen, config.HIGHSCORE_TEXT)
 
         entry = tk.Entry(screen, **config.HIGHSCORE_ENTRY)
+
+        try:
+            entry.insert(tk.END, getpass.getuser())
+        except Exception:
+            # getpass.getuser may raise an exception, but the docs don't
+            # specify what exception may be raised.
+            # For example, under Windows, it may be an ImportError
+            pass
 
         def submit():
             if not entry.get().strip():

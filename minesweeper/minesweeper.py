@@ -61,7 +61,7 @@ class Minesweeper:
         self.difficulty = 0
         # Solve potential issue with incr_time running multiple times
 
-        self.highscore_screen: tk.Tk = None  # type: ignore
+        self.highscore_screen: t.Optional[tk.Tk] = None
 
     def incr_time(self, game_num: int) -> None:
         """Increment the time and time display."""
@@ -296,6 +296,7 @@ class Minesweeper:
         entry.grid(config.HIGHSCORE_ENTRY_GRID)
         button.grid(config.HIGHSCORE_BUTTON_GRID)
 
+        screen.resizable(False, False)
         screen.focus_force()
 
     def endscreen(self, args):
@@ -311,6 +312,11 @@ class Minesweeper:
             except tk.TclError:
                 # Main already closed
                 pass
+            if self.highscore_screen is not None:
+                try:
+                    self.highscore_screen.destroy()
+                except tk.TclError:
+                    pass
             screen.destroy()
             self.database.con.close()
 

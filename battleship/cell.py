@@ -1,8 +1,7 @@
 """Battleship cell."""
 
-import typing as t
-
 import tkinter as tk
+import typing as t
 
 from . import config
 from .drawer import draw

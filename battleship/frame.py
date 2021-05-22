@@ -1,8 +1,7 @@
 """Represent a person's frame."""
 
-import typing as t
-
 import tkinter as tk
+import typing as t
 
 from . import config
 from .cell import Cell

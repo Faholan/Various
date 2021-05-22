@@ -1,6 +1,5 @@
 from .battleship import Battleship
 
-
 if __name__ == "__main__":
     PLAYING = True
     while PLAYING:

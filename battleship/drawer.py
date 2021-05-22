@@ -12,48 +12,64 @@ def draw(canvas, cur_boat, num, orientation, status) -> None:
         conf = config.DRAW_BLINKING
     else:
         conf = config.DRAW_HIT
-    if num == 0 and orientation == Orientation.NORTH or (
-        num == config.SIZES[cur_boat] - 1 and orientation == Orientation.SOUTH
+    if (
+        num == 0
+        and orientation == Orientation.NORTH
+        or (num == config.SIZES[cur_boat] - 1 and orientation == Orientation.SOUTH)
     ):
         # Bottom drawing
         canvas.create_arc(
-            0, - config.CELL_SIZE * 3/4,
-            config.CELL_SIZE * 21 / 20, config.CELL_SIZE * 3/4,
+            0,
+            -config.CELL_SIZE * 3 / 4,
+            config.CELL_SIZE * 21 / 20,
+            config.CELL_SIZE * 3 / 4,
             fill=conf["bg"],
             outline=conf["border"],
             extent=180,
             start=180,
         )
-    elif num == 0 and orientation == Orientation.WEST or (
-        num == config.SIZES[cur_boat] - 1 and orientation == Orientation.EAST
+    elif (
+        num == 0
+        and orientation == Orientation.WEST
+        or (num == config.SIZES[cur_boat] - 1 and orientation == Orientation.EAST)
     ):
         # Right drawing
         canvas.create_arc(
-            -config.CELL_SIZE * 3/4, 0,
-            config.CELL_SIZE * 3/4, config.CELL_SIZE * 21/20,
+            -config.CELL_SIZE * 3 / 4,
+            0,
+            config.CELL_SIZE * 3 / 4,
+            config.CELL_SIZE * 21 / 20,
             fill=conf["bg"],
             outline=conf["border"],
             extent=180,
             start=-90,
         )
-    elif num == 0 and orientation == Orientation.SOUTH or (
-        num == config.SIZES[cur_boat] - 1 and orientation == Orientation.NORTH
+    elif (
+        num == 0
+        and orientation == Orientation.SOUTH
+        or (num == config.SIZES[cur_boat] - 1 and orientation == Orientation.NORTH)
     ):
         # Top drawing
         canvas.create_arc(
-            0, config.CELL_SIZE / 4,
-            config.CELL_SIZE * 21/20, config.CELL_SIZE * 2,
+            0,
+            config.CELL_SIZE / 4,
+            config.CELL_SIZE * 21 / 20,
+            config.CELL_SIZE * 2,
             fill=conf["bg"],
             outline=conf["border"],
             extent=180,
         )
-    elif num == 0 and orientation == Orientation.EAST or (
-        num == config.SIZES[cur_boat] - 1 and orientation == Orientation.WEST
+    elif (
+        num == 0
+        and orientation == Orientation.EAST
+        or (num == config.SIZES[cur_boat] - 1 and orientation == Orientation.WEST)
     ):
         # Left drawing
         canvas.create_arc(
-            config.CELL_SIZE * 1/4, 0,
-            config.CELL_SIZE * 2, config.CELL_SIZE * 21/20,
+            config.CELL_SIZE * 1 / 4,
+            0,
+            config.CELL_SIZE * 2,
+            config.CELL_SIZE * 21 / 20,
             fill=conf["bg"],
             outline=conf["border"],
             extent=180,

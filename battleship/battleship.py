@@ -24,14 +24,14 @@ class Battleship:
 
     __slots__ = (
         "main",
-        "placing",
-        "playing",
         "player_frame",
         "enemy_frame",
         "candidate",
+        "boat_candidate",
         "orientation",
         "cur_boat",
-        "boat_candidate",
+        "placing",
+        "playing",
         "continue_playing",
         # AI
         "impossible",
@@ -50,24 +50,31 @@ class Battleship:
 
         self.main.config(**config.MAIN_CONFIG)
 
-        self.placing = True
-        self.playing = True
-
         self.player_frame = Frame(self, True)
         self.enemy_frame = Frame(self, False)
 
+        # The cell clicked for placing a boat
         self.candidate: t.Optional[t.Tuple[int, int]] = None
 
+        # The boat that may be pressed
         self.boat_candidate: t.Optional[t.List[t.Tuple[int, int]]] = None
 
+        # Currently selected orientation
         self.orientation = Orientation.EAST
 
+        # N° of the boat being placed
         self.cur_boat = 0
 
+        # State variables
+        self.placing = True
+        self.playing = True
+
+        # Whether or not to start a new game after this one is finished
         self.continue_playing = False
 
         # Tkinter configuration
         self.main.bind("<Return>", self.place_boat)
+        self.main.bind("<space>", self.place_boat)
 
         self.player_frame.frame.grid(config.PLAYER_GRID)
         self.enemy_frame.frame.grid(config.ENEMY_GRID)
@@ -81,12 +88,23 @@ class Battleship:
             self.main.bind(key, self._rotator(orientation))
 
         self.main.resizable(False, False)
+        self.main.focus_force()
 
         # AI
+
+        # Cells that cannot contain boats
         self.impossible: t.List[t.Tuple[int, int]] = []
+
+        # Cells that most probably contain a boat cell
         self.must_fire: t.List[t.Tuple[t.Tuple[int, int], Orientation]] = []
+
+        # Remember the remaining enemy boats
         self.not_destroyed = list(config.SIZES)
+
+        # Boat being currently hit
         self.hit_boat: t.List[t.Tuple[int, int]] = []
+
+        # Step for the fire grid
         self.dist = 2
         self.fire_grid = self._get_fire_grid()
 
@@ -105,7 +123,7 @@ class Battleship:
         return (not self.placing) and self.playing
 
     def candidate_place(self, coords) -> None:
-        """Place a boat."""
+        """Place a candidate."""
         if self.candidate:
             i, j = self.candidate
             self.player_frame.grid[i][j].canvas.config(**config.CELL_DEFAULT)
@@ -113,7 +131,10 @@ class Battleship:
         self.turn_boat()
 
     def _rotator(self, orientation):
-        """Generate a caller to rotate the boat."""
+        """Generate a caller to rotate the boat.
+
+        This is called by the Up, Down, Left and Right keys
+        """
         def predictate(_) -> None:
             self.orientation = orientation
             self.turn_boat()
@@ -142,6 +163,8 @@ class Battleship:
             return [(x - i, y) for i in range(config.SIZES[cur_boat])]
         if orientation == Orientation.EAST:
             return [(x, y + i) for i in range(config.SIZES[cur_boat])]
+
+        # west
         return [(x, y - i) for i in range(config.SIZES[cur_boat])]
 
     def _is_valid(self, boat: t.List[t.Tuple[int, int]], frame: Frame) -> bool:
@@ -205,7 +228,10 @@ class Battleship:
             )
 
     def place_boat(self, _) -> None:
-        """Place the boat."""
+        """Place the boat.
+
+        This is called by the Enter and space keys
+        """
         if not self.boat_candidate or not self.placing:
             return  # No boat to place.
 
@@ -276,7 +302,6 @@ class Battleship:
 
     def place_ai_boats(self) -> None:
         """Place the AI's boats."""
-
         cur_boat = 0
 
         while cur_boat < len(config.SIZES):
@@ -313,22 +338,33 @@ class Battleship:
         target = self.player_frame.grid
 
         if self.must_fire:
+            # The AI knows which cells are likely to hold boats
+
             (i, j), orientation = choice(self.must_fire)
             self.impossible.append((i, j))
             self.must_fire.remove(((i, j), orientation))
+
+            # We don't know the enemy boat's orientation
             no_direction = (len(self.hit_boat) == 1)
+
             if not target[i][j].fire():
+                # A miss
                 if not self.must_fire:
+                    # No remaining cell -> boat destroyed
                     self.not_destroyed.remove(len(self.hit_boat))
                     if min(self.not_destroyed) > self.dist:
+                        # We can increase dist
                         self.dist = min(self.not_destroyed)
                         self.fire_grid = self._get_fire_grid()
                     for coords in self.hit_boat:
+                        # No neighbouring cells contain boats
                         self.impossible += self._neighbours(coords)
                     self.hit_boat = []
             else:
+                # We have hit a boat
                 self.hit_boat.append((i, j))
                 if no_direction:
+                    # We now know the orientation
                     for coords, orient in self.must_fire:
                         if orient != OPPOSITES[orientation]:
                             self.must_fire.remove((coords, orient))
@@ -343,22 +379,27 @@ class Battleship:
                     i2, j2 = i, j - 1
 
                 if 0 <= i2 < config.GRID_SIZE and 0 <= j2 < config.GRID_SIZE:
+                    # Can we continue firing in that direction ?
                     self.must_fire.append(((i2, j2), orientation))
 
                 if len(self.hit_boat) == max(self.not_destroyed):
+                    # We must have destroyed a boat
                     self.not_destroyed.remove(len(self.hit_boat))
                     for coords in self.hit_boat:
                         self.impossible += self._neighbours(coords)
                     self.must_fire = []
                     self.hit_boat = []
         else:
+            # Choose a random possible cell from the grid
             (i, j) = choice(self.fire_grid)
             while (i, j) in self.impossible:
                 (i, j) = choice(self.fire_grid)
-            if not target[i][j].fire():
-                self.fire_grid.remove((i, j))
-                self.impossible.append((i, j))
-            else:
+
+            self.fire_grid.remove((i, j))
+            self.impossible.append((i, j))
+
+            if target[i][j].fire():
+                # We have hit something
                 self.hit_boat = [(i, j)]
                 if i != 0:
                     self.must_fire.append(((i - 1, j), Orientation.NORTH))

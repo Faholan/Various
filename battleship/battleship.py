@@ -1,15 +1,13 @@
 """Battleship game."""
 
-from random import choice, randint
-import typing as t
-
 import tkinter as tk
+import typing as t
+from random import choice, randint
 
 from . import config
 from .drawer import draw
 from .enums import Orientation, Status
 from .frame import Frame
-
 
 OPPOSITES = {
     Orientation.NORTH: Orientation.SOUTH,
@@ -138,6 +136,7 @@ class Battleship:
         def predictate(_) -> None:
             self.orientation = orientation
             self.turn_boat()
+
         return predictate
 
     @staticmethod
@@ -177,11 +176,12 @@ class Battleship:
 
         if any(
             any(
-                0 <= i < config.GRID_SIZE and 0 <= j < config.GRID_SIZE and (
-                    frame.grid[i][j].isboat
-                )
+                0 <= i < config.GRID_SIZE
+                and 0 <= j < config.GRID_SIZE
+                and (frame.grid[i][j].isboat)
                 for i, j in self._neighbours(coords)
-            ) for coords in boat
+            )
+            for coords in boat
         ):
             return False
         return True
@@ -195,16 +195,13 @@ class Battleship:
                 for i, j in self.boat_candidate:
                     self.player_frame.grid[i][j].canvas.delete(tk.ALL)
                     self.player_frame.grid[i][j].canvas.config(
-                        **config.CELL_DEFAULT
-                    )
+                        **config.CELL_DEFAULT)
         except tk.TclError:
             return
 
         i, j = self.candidate
 
-        self.player_frame.grid[i][j].canvas.config(
-            **config.CELL_DEFAULT
-        )
+        self.player_frame.grid[i][j].canvas.config(**config.CELL_DEFAULT)
 
         boat = self._boat_cells(
             self.candidate,
@@ -213,9 +210,7 @@ class Battleship:
         )
 
         if not self._is_valid(boat, self.player_frame):
-            self.player_frame.grid[i][j].canvas.config(
-                **config.CELL_BLINKING
-            )
+            self.player_frame.grid[i][j].canvas.config(**config.CELL_BLINKING)
             return
         self.boat_candidate = boat  # valid placement
         for k, (i, j) in enumerate(boat):
@@ -305,7 +300,9 @@ class Battleship:
         cur_boat = 0
 
         while cur_boat < len(config.SIZES):
-            candidate = randint(0, config.GRID_SIZE - 1), randint(0, config.GRID_SIZE - 1)
+            candidate = randint(0, config.GRID_SIZE - 1), randint(
+                0, config.GRID_SIZE - 1
+            )
             orientation = choice((Orientation.NORTH, Orientation.EAST))
             # Only two orientations need to be considered
 
@@ -324,7 +321,8 @@ class Battleship:
         final = []
         for i in range(10):
             final += [
-                (i, self.dist * j + i % self.dist) for j in range(10//self.dist)
+                (i, self.dist * j + i % self.dist)
+                for j in range(10 // self.dist)
                 if (i, self.dist * j + i % self.dist) not in self.impossible
             ]
 
@@ -345,8 +343,7 @@ class Battleship:
             self.must_fire.remove(((i, j), orientation))
 
             # We don't know the enemy boat's orientation
-            no_direction = (len(self.hit_boat) == 1)
-
+            no_direction = len(self.hit_boat) == 1
             if not target[i][j].fire():
                 # A miss
                 if not self.must_fire:

@@ -212,8 +212,7 @@ class Battleship:
 
         if not self._is_valid(boat, self.player_frame):
             self.player_frame.grid[i][j].canvas.config(
-                **config.DRAW_BLINKING["static"]
-            )
+                **config.DRAW_BLINKING["static"])
             return
         self.boat_candidate = boat  # valid placement
         for k, (i, j) in enumerate(boat):

@@ -86,7 +86,7 @@ CONF_LOSS = {
 
 RESTART_BTN = {
     "text": "RESTART",
-    "bg": "green3",
+    "bg": "blue",
     "fg": "white",
     "font": "arial 20",
 }

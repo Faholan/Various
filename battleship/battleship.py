@@ -133,6 +133,7 @@ class Battleship:
 
         This is called by the Up, Down, Left and Right keys
         """
+
         def predictate(_) -> None:
             self.orientation = orientation
             self.turn_boat()

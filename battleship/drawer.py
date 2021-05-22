@@ -23,10 +23,9 @@ def draw(canvas, cur_boat, num, orientation, status) -> None:
             -config.CELL_SIZE * 3 / 4,
             config.CELL_SIZE * 21 / 20,
             config.CELL_SIZE * 3 / 4,
-            fill=conf["bg"],
-            outline=conf["border"],
             extent=180,
             start=180,
+            **conf["draw"]
         )
     elif (
         num == 0
@@ -39,10 +38,9 @@ def draw(canvas, cur_boat, num, orientation, status) -> None:
             0,
             config.CELL_SIZE * 3 / 4,
             config.CELL_SIZE * 21 / 20,
-            fill=conf["bg"],
-            outline=conf["border"],
             extent=180,
             start=-90,
+            **conf["draw"]
         )
     elif (
         num == 0
@@ -55,9 +53,8 @@ def draw(canvas, cur_boat, num, orientation, status) -> None:
             config.CELL_SIZE / 4,
             config.CELL_SIZE * 21 / 20,
             config.CELL_SIZE * 2,
-            fill=conf["bg"],
-            outline=conf["border"],
             extent=180,
+            **conf["draw"]
         )
     elif (
         num == 0
@@ -70,10 +67,9 @@ def draw(canvas, cur_boat, num, orientation, status) -> None:
             0,
             config.CELL_SIZE * 2,
             config.CELL_SIZE * 21 / 20,
-            fill=conf["bg"],
-            outline=conf["border"],
             extent=180,
             start=90,
+            **conf["draw"]
         )
     else:
-        canvas.config(bg=conf["bg"])
+        canvas.config(**conf["static"])

@@ -1,13 +1,13 @@
 """Battleship configuration."""
 
 # Battleship configuration
-GRID_SIZE = 10
+GRID_SIZE = 10  # Number of rows and columns in the grid
 
-CELL_SIZE = 50
+CELL_SIZE = 50  # Size (in pixel) of each square
 
-SIZES = (5, 4, 3, 3, 2)
+SIZES = (5, 4, 3, 3, 2)  # Boat sizes
 
-SHOW_AI_MISSED = True  # Show the hits missed by the AI
+SHOW_AI_MISSED = False  # Show the hits missed by the AI
 
 TITLE = "Battleship"
 
@@ -18,41 +18,47 @@ FRAME_CONFIG = {"borderwidth": 5}
 PLAYER_GRID = {"row": 0, "column": 0}
 ENEMY_GRID = {"row": 0, "column": 1}
 
-DRAW_PLACING = {
-    "bg": "green",
-    "border": "green4",
-}
+# Drawing
 
-DRAW_BLINKING = {
-    "bg": "yellow",
-    "border": "yellow4",
-}
-
-DRAW_HIT = {
-    "bg": "red",
-    "border": "red4",
-}
-
-# Cell configuration
 CELL_DEFAULT = {
     "bg": "gray30",
-}
-
-CELL_HIT = {
-    "bg": "red",
 }
 
 CELL_MISSED = {
     "bg": "white",
 }
 
-CELL_BOAT = {
-    "bg": "green",
+DRAW_PLACING = {
+    "draw": {  # curved parts
+        "fill": "green",
+        "outline": "green4",
+    },
+    "static": {  # square parts (+ enemy)
+        "bg": "green",
+    },
 }
 
-CELL_BLINKING = {
-    "bg": "yellow",
+DRAW_BLINKING = {
+    "draw": {  # curved parts
+        "fill": "yellow",
+        "outline": "yellow4",
+    },
+    "static": {  # square parts (+ enemy)
+        "bg": "yellow",
+    },
 }
+
+DRAW_HIT = {
+    "draw": {  # curved parts
+        "fill": "red",
+        "outline": "red4",
+    },
+    "static": {  # square parts (+ enemy)
+        "bg": "red",
+    },
+}
+
+# Endgame
 
 CONF_WIN = {
     "title": "You won!",

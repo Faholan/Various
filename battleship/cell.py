@@ -80,9 +80,9 @@ class Cell:
                 self.canvas.delete("all")
                 draw(self.canvas, status=Status.HIT, **self.drawer_args)
             else:
-                self.canvas.config(config.CELL_HIT)
+                self.canvas.config(**config.DRAW_HIT["static"])
             self.master.hit(self.coords)
-        elif self.master.player or config.SHOW_AI_MISSED:
+        elif not self.master.player or config.SHOW_AI_MISSED:
             self.canvas.config(config.CELL_MISSED)
 
         if not self.master.player:

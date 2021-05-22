@@ -1,3 +1,4 @@
+"""Start the battleship game."""
 from .battleship import Battleship
 
 if __name__ == "__main__":

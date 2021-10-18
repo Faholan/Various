@@ -197,7 +197,8 @@ class Battleship:
             if self.boat_candidate:
                 for i, j in self.boat_candidate:
                     self.player_frame.grid[i][j].canvas.delete(tk.ALL)
-                    self.player_frame.grid[i][j].canvas.config(**config.CELL_DEFAULT)
+                    self.player_frame.grid[i][j].canvas.config(
+                        **config.CELL_DEFAULT)
         except tk.TclError:
             return
 
@@ -212,7 +213,8 @@ class Battleship:
         )
 
         if not self._is_valid(boat, self.player_frame):
-            self.player_frame.grid[i][j].canvas.config(**config.DRAW_BLINKING["static"])
+            self.player_frame.grid[i][j].canvas.config(
+                **config.DRAW_BLINKING["static"])
             self.boat_candidate = None
             return
         self.boat_candidate = boat  # valid placement

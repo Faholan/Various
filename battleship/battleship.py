@@ -120,7 +120,7 @@ class Battleship:
         """Whether or not to process clicks."""
         return (not self.placing) and self.playing
 
-    def candidate_place(self, coords) -> None:
+    def candidate_place(self, coords: t.Tuple[int, int]) -> None:
         """Place a candidate."""
         if self.candidate:
             i, j = self.candidate
@@ -128,23 +128,25 @@ class Battleship:
         self.candidate = coords
         self.turn_boat()
 
-    def _rotator(self, orientation):
+    def _rotator(self, orientation: Orientation) -> t.Callable[[t.Any], None]:
         """Generate a caller to rotate the boat.
 
         This is called by the Up, Down, Left and Right keys
         """
 
-        def predictate(_) -> None:
+        def predictate(_: t.Any) -> None:
             self.orientation = orientation
             self.turn_boat()
 
         return predictate
 
     @staticmethod
-    def _neighbours(coords):
+    def _neighbours(
+        coords: t.Tuple[int, int]
+    ) -> t.Generator[t.Tuple[int, int], None, None]:
         """Yield all neighbours of a couple of coordinates."""
-        for i in {-1, 0, 1}:
-            for j in {-1, 0, 1}:
+        for i in (-1, 0, 1):
+            for j in (-1, 0, 1):
                 yield coords[0] + i, coords[1] + j
 
     @staticmethod
@@ -195,8 +197,7 @@ class Battleship:
             if self.boat_candidate:
                 for i, j in self.boat_candidate:
                     self.player_frame.grid[i][j].canvas.delete(tk.ALL)
-                    self.player_frame.grid[i][j].canvas.config(
-                        **config.CELL_DEFAULT)
+                    self.player_frame.grid[i][j].canvas.config(**config.CELL_DEFAULT)
         except tk.TclError:
             return
 
@@ -211,8 +212,7 @@ class Battleship:
         )
 
         if not self._is_valid(boat, self.player_frame):
-            self.player_frame.grid[i][j].canvas.config(
-                **config.DRAW_BLINKING["static"])
+            self.player_frame.grid[i][j].canvas.config(**config.DRAW_BLINKING["static"])
             self.boat_candidate = None
             return
         self.boat_candidate = boat  # valid placement
@@ -225,7 +225,7 @@ class Battleship:
                 Status.BLINKING,
             )
 
-    def place_boat(self, _) -> None:
+    def place_boat(self, _: t.Any) -> None:
         """Place the boat.
 
         This is called by the Enter and space keys
@@ -275,13 +275,13 @@ class Battleship:
 
         text = tk.Label(screen, **conf["text"])  # type: ignore
 
-        def stop():
+        def stop() -> None:
             try:
                 self.main.destroy()
             except tk.TclError:
                 pass
 
-        def restart():
+        def restart() -> None:
             self.continue_playing = True
             stop()
 
@@ -321,7 +321,7 @@ class Battleship:
 
     def _get_fire_grid(self) -> t.List[t.Tuple[int, int]]:
         """Get the grid for the AI's fire."""
-        final = []
+        final: t.List[t.Tuple[int, int]] = []
         for i in range(10):
             final += [
                 (i, self.dist * j + i % self.dist)

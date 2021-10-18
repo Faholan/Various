@@ -74,7 +74,9 @@ class Minesweeper:
 
             self.main.after(1000, self.incr_time, game_num)
 
-    def gen_game(self, difficulty: int, args) -> t.Callable:
+    def gen_game(
+        self, difficulty: int, args: t.Dict[str, t.Any]
+    ) -> t.Callable[[], None]:
         """Generate callables for the different difficulties."""
 
         def predicate() -> None:
@@ -101,7 +103,7 @@ class Minesweeper:
 
     def neighbours(self, i: int, j: int) -> t.List[Cell]:
         """Get the neighbours of a cell."""
-        final = []
+        final: t.List[Cell] = []
         if i != 0:
             final.append(self.grid[i - 1][j])
 
@@ -250,7 +252,7 @@ class Minesweeper:
 
         self.endscreen(config.WIN_END)
 
-    def new_highscore(self, lowest) -> None:
+    def new_highscore(self, lowest: t.Optional[int]) -> None:
         """Add a new highscore."""
         screen = tk.Tk()
         screen.title("New highscore!")
@@ -272,7 +274,7 @@ class Minesweeper:
             # For example, under Windows, it may be an ImportError
             pass
 
-        def submit():
+        def submit() -> None:
             if not entry.get().strip():
                 messagebox.showerror(
                     "Invalid operation",
@@ -299,14 +301,14 @@ class Minesweeper:
         screen.resizable(False, False)
         screen.focus_force()
 
-    def endscreen(self, args):
+    def endscreen(self, args: t.Dict[str, t.Any]) -> None:
         """Draw the endscreen."""
         screen = tk.Tk()
         screen.title(args["title"])
         screen.config(bg=args["bg"])
         text = tk.Label(screen, **args["text"])
 
-        def stop():
+        def stop() -> None:
             try:
                 self.main.destroy()
             except tk.TclError:
@@ -320,7 +322,7 @@ class Minesweeper:
             screen.destroy()
             self.database.con.close()
 
-        def restart():
+        def restart() -> None:
             try:
                 self.main.destroy()
             except tk.TclError:

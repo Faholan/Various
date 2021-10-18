@@ -1,5 +1,7 @@
 """Minesweeper configuration."""
 
+import typing as t
+
 CELL_ARGS = {
     "bg": "ivory3",
     "highlightbackground": "saddle brown",
@@ -69,7 +71,7 @@ GAME_CONFIG = {
     "bg": "royal blue",
 }
 
-FRAME = {}
+FRAME: t.Dict[str, t.Union[str, int]] = {}
 
 REMAINING_MINES = {
     "bg": "royal blue",

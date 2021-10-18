@@ -1,8 +1,14 @@
 """Implementation of a minesweeper cell."""
 
 import tkinter as tk
+import typing as t
 
 from . import config
+
+if t.TYPE_CHECKING:
+    from .minesweeper import Minesweeper
+else:
+    Minesweeper = t.Any
 
 
 class Cell:
@@ -31,7 +37,7 @@ class Cell:
         "white",
     )
 
-    def __init__(self, master, i, j):
+    def __init__(self, master: Minesweeper, i: int, j: int) -> None:
         """Initialize the cell."""
         self.master = master
         self.size = self.master.cell_size
@@ -52,7 +58,7 @@ class Cell:
         """Get the colour associated to the value."""
         return self.colours[self.value]
 
-    def left(self, _=None) -> None:
+    def left(self, _: t.Any = None) -> None:
         """Implement left clicking."""
         if self.flagged or not self.master.enabled:
             return
@@ -79,7 +85,7 @@ class Cell:
             self.master.enabled = False
             self.master.win()
 
-    def flag(self, _=None) -> None:
+    def flag(self, _: t.Any = None) -> None:
         """Flag thyself."""
         if self.clicked or not self.master.enabled:
             return

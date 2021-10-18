@@ -1,10 +1,14 @@
 """Draw the battleships."""
 
+import tkinter as tk
+
 from . import config
 from .enums import Orientation, Status
 
 
-def draw(canvas, cur_boat, num, orientation, status) -> None:
+def draw(
+    canvas: tk.Canvas, cur_boat: int, num: int, orientation: Orientation, status: Status
+) -> None:
     """Draw a boat part in a canvas."""
     if status == Status.PLACING:
         conf = config.DRAW_PLACING

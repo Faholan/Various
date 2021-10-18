@@ -6,6 +6,11 @@ import typing as t
 from . import config
 from .cell import Cell
 
+if t.TYPE_CHECKING:
+    from .battleship import Battleship
+else:
+    Battleship = t.Any
+
 
 class Frame:
     """A frame."""
@@ -18,7 +23,7 @@ class Frame:
         "grid",
     )
 
-    def __init__(self, master, player: bool) -> None:
+    def __init__(self, master: Battleship, player: bool) -> None:
         """Initialize the frame."""
         self.master = master
 
@@ -33,7 +38,7 @@ class Frame:
             for i in range(config.GRID_SIZE)
         ]
 
-    def hit(self, coords) -> None:
+    def hit(self, coords: t.Tuple[int, int]) -> None:
         """Act upon a cell being hit."""
         self.boats.remove(coords)
 

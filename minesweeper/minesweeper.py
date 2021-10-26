@@ -74,9 +74,7 @@ class Minesweeper:
 
             self.main.after(1000, self.incr_time, game_num)
 
-    def gen_game(
-        self, difficulty: int, args: dict[str, t.Any]
-    ) -> t.Callable[[], None]:
+    def gen_game(self, difficulty: int, args: dict[str, t.Any]) -> t.Callable[[], None]:
         """Generate callables for the different difficulties."""
 
         def predicate() -> None:

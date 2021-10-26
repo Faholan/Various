@@ -36,9 +36,7 @@ class Database:
             (difficulty,),
         ).fetchall()
 
-    def is_highscore(
-        self, difficulty: int, time: int
-    ) -> tuple[bool, t.Optional[int]]:
+    def is_highscore(self, difficulty: int, time: int) -> tuple[bool, t.Optional[int]]:
         """
         Test if a score is in the leaderboard.
 

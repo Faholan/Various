@@ -31,14 +31,14 @@ class Frame:
 
         self.frame = tk.Frame(master.main, config.FRAME_CONFIG)
 
-        self.boats: t.List[t.Tuple[int, int]] = []
+        self.boats: list[tuple[int, int]] = []
 
         self.grid = [
             [Cell(self, (i, j)) for j in range(config.GRID_SIZE)]
             for i in range(config.GRID_SIZE)
         ]
 
-    def hit(self, coords: t.Tuple[int, int]) -> None:
+    def hit(self, coords: tuple[int, int]) -> None:
         """Act upon a cell being hit."""
         self.boats.remove(coords)
 

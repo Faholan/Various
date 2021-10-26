@@ -44,7 +44,7 @@ class Minesweeper:
 
         self.cell_size = 0
 
-        self.grid: t.List[t.List[Cell]] = []
+        self.grid: list[list[Cell]] = []
 
         self.rows = 0
         self.columns = 0
@@ -75,7 +75,7 @@ class Minesweeper:
             self.main.after(1000, self.incr_time, game_num)
 
     def gen_game(
-        self, difficulty: int, args: t.Dict[str, t.Any]
+        self, difficulty: int, args: dict[str, t.Any]
     ) -> t.Callable[[], None]:
         """Generate callables for the different difficulties."""
 
@@ -101,9 +101,9 @@ class Minesweeper:
 
         return True
 
-    def neighbours(self, i: int, j: int) -> t.List[Cell]:
+    def neighbours(self, i: int, j: int) -> list[Cell]:
         """Get the neighbours of a cell."""
-        final: t.List[Cell] = []
+        final: list[Cell] = []
         if i != 0:
             final.append(self.grid[i - 1][j])
 
@@ -301,7 +301,7 @@ class Minesweeper:
         screen.resizable(False, False)
         screen.focus_force()
 
-    def endscreen(self, args: t.Dict[str, t.Any]) -> None:
+    def endscreen(self, args: dict[str, t.Any]) -> None:
         """Draw the endscreen."""
         screen = tk.Tk()
         screen.title(args["title"])

@@ -71,7 +71,7 @@ GAME_CONFIG = {
     "bg": "royal blue",
 }
 
-FRAME: t.Dict[str, t.Union[str, int]] = {}
+FRAME: dict[str, t.Union[str, int]] = {}
 
 REMAINING_MINES = {
     "bg": "royal blue",

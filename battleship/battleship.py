@@ -52,10 +52,10 @@ class Battleship:
         self.enemy_frame = Frame(self, False)
 
         # The cell clicked for placing a boat
-        self.candidate: t.Optional[t.Tuple[int, int]] = None
+        self.candidate: t.Optional[tuple[int, int]] = None
 
         # The boat that may be pressed
-        self.boat_candidate: t.Optional[t.List[t.Tuple[int, int]]] = None
+        self.boat_candidate: t.Optional[list[tuple[int, int]]] = None
 
         # Currently selected orientation
         self.orientation = Orientation.EAST
@@ -91,16 +91,16 @@ class Battleship:
         # AI
 
         # Cells that cannot contain boats
-        self.impossible: t.List[t.Tuple[int, int]] = []
+        self.impossible: list[tuple[int, int]] = []
 
         # Cells that most probably contain a boat cell
-        self.must_fire: t.List[t.Tuple[t.Tuple[int, int], Orientation]] = []
+        self.must_fire: list[tuple[tuple[int, int], Orientation]] = []
 
         # Remember the remaining enemy boats
         self.not_destroyed = list(config.SIZES)
 
         # Boat being currently hit
-        self.hit_boat: t.List[t.Tuple[int, int]] = []
+        self.hit_boat: list[tuple[int, int]] = []
 
         # Step for the fire grid
         self.dist = 2
@@ -120,7 +120,7 @@ class Battleship:
         """Whether or not to process clicks."""
         return (not self.placing) and self.playing
 
-    def candidate_place(self, coords: t.Tuple[int, int]) -> None:
+    def candidate_place(self, coords: tuple[int, int]) -> None:
         """Place a candidate."""
         if self.candidate:
             i, j = self.candidate
@@ -142,8 +142,8 @@ class Battleship:
 
     @staticmethod
     def _neighbours(
-        coords: t.Tuple[int, int]
-    ) -> t.Generator[t.Tuple[int, int], None, None]:
+        coords: tuple[int, int]
+    ) -> t.Generator[tuple[int, int], None, None]:
         """Yield all neighbours of a couple of coordinates."""
         for i in (-1, 0, 1):
             for j in (-1, 0, 1):
@@ -151,10 +151,10 @@ class Battleship:
 
     @staticmethod
     def _boat_cells(
-        candidate: t.Tuple[int, int],
+        candidate: tuple[int, int],
         orientation: Orientation,
         cur_boat: int,
-    ) -> t.List[t.Tuple[int, int]]:
+    ) -> list[tuple[int, int]]:
         """Get the cells the boat considered shall be in."""
         if not candidate:
             return [(-1, -1)]
@@ -169,7 +169,7 @@ class Battleship:
         # west
         return [(x, y - i) for i in range(config.SIZES[cur_boat])]
 
-    def _is_valid(self, boat: t.List[t.Tuple[int, int]], frame: Frame) -> bool:
+    def _is_valid(self, boat: list[tuple[int, int]], frame: Frame) -> bool:
         """Check if a boat can be placed in a frame."""
         if any(
             i < 0 or j < 0 or i >= config.GRID_SIZE or (j >= config.GRID_SIZE)
@@ -321,9 +321,9 @@ class Battleship:
                 self.enemy_frame.grid[i][j].isboat = True
                 self.enemy_frame.boats.append((i, j))
 
-    def _get_fire_grid(self) -> t.List[t.Tuple[int, int]]:
+    def _get_fire_grid(self) -> list[tuple[int, int]]:
         """Get the grid for the AI's fire."""
-        final: t.List[t.Tuple[int, int]] = []
+        final: list[tuple[int, int]] = []
         for i in range(10):
             final += [
                 (i, self.dist * j + i % self.dist)

@@ -23,7 +23,7 @@ class Cell:
     def __init__(
         self,
         master,
-        coords: t.Tuple[int, int],
+        coords: tuple[int, int],
     ) -> None:
         """Initialize the cell."""
         self.master = master
@@ -40,7 +40,7 @@ class Cell:
         self.fired = False
         self.isboat = False
 
-        self.drawer_args: t.Dict[str, t.Any] = {}
+        self.drawer_args: dict[str, t.Any] = {}
 
         self.canvas.grid(row=coords[0], column=coords[1])
 

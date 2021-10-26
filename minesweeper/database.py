@@ -28,7 +28,7 @@ class Database:
         )
         self.con.commit()
 
-    def highscores(self, difficulty: int) -> t.List[t.Tuple[int, str]]:
+    def highscores(self, difficulty: int) -> list[tuple[int, str]]:
         """Fetch the highscores."""
         cur = self.con.cursor()
         return cur.execute(
@@ -38,7 +38,7 @@ class Database:
 
     def is_highscore(
         self, difficulty: int, time: int
-    ) -> t.Tuple[bool, t.Optional[int]]:
+    ) -> tuple[bool, t.Optional[int]]:
         """
         Test if a score is in the leaderboard.
 

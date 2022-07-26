@@ -7,7 +7,7 @@ CELL_SIZE = 50  # Size (in pixel) of each square
 
 SIZES = (5, 4, 3, 3, 2)  # Boat sizes
 
-SHOW_AI_MISSED = True  # Show the hits missed by the AI
+SHOW_AI_MISSED = False  # Show the hits missed by the AI
 
 TITLE = "Battleship"
 

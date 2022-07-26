@@ -1,9 +1,8 @@
 """Plot a pie graph nicely. For Discord bots later."""
 
-from matplotlib import pyplot as plt
-
 import typing as t
 
+from matplotlib import pyplot as plt
 
 DATA = {
     "DnD": 3,

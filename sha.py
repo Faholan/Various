@@ -2,7 +2,7 @@
 
 from typing import List
 
-__all__ = ("sha", )
+__all__ = ("sha",)
 
 MODULUS = (1 << 32) - 1
 
